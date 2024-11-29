@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\Store;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -19,9 +20,22 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Store $store)
     {
-        //
+        $validatedData = $request->validate([
+            'name'        => 'require|string|max:128',
+            'description' => 'required|string|max:255',
+            'price'       => 'required|min:0',
+            'stock'       => 'required|min:0',
+        ]);
+
+        $store = Store::where('id', $store)->first();
+        $product = $store->products()->create($validatedData);
+
+        return response()->json([
+           'message' => 'Product has been created Successfully.',
+           'product'=> $product
+        ]);
     }
 
     /**
