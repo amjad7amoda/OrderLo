@@ -40,6 +40,13 @@ class Product extends Model
 
     public function images(): HasMany
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(Image::class);
+    }
+
+    public function scopeWithImages($query)
+    {
+        return $query->with(['images' => function ($query) {
+            $query->select('product_id','path');
+        }]);
     }
 }

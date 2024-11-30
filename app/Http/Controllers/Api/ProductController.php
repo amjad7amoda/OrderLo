@@ -6,59 +6,119 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\Store;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function index(int $store)
     {
-        //
+        // Check if the store exists
+        $store = Store::with('products.images')->find($store);
+        if (!$store) {
+            return response()->json(['error' => 'This store does not exist'], 404);
+        }
+
+        $products = $store->products->map(function ($product) {
+            return array_merge(
+                $product->toArray(),
+                [
+                    'images' => $product->images->map(function ($image) {
+                        return asset($image->path);
+                    })->toArray()
+                ]
+            );
+        });
+        return response()->json(['products' => $products]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request, Store $store)
+    public function store(Request $request, int $store)
     {
+        $store = Store::where('id', $store)->first();
+        if (!$store) {
+            return response()->json(['error' => 'This store is not exists']);
+        }
+
         $validatedData = $request->validate([
-            'name'        => 'require|string|max:128',
+            'name'        => 'required|string|max:128',
             'description' => 'required|string|max:255',
             'price'       => 'required|min:0',
             'stock'       => 'required|min:0',
         ]);
 
-        $store = Store::where('id', $store)->first();
         $product = $store->products()->create($validatedData);
 
         return response()->json([
-           'message' => 'Product has been created Successfully.',
-           'product'=> $product
+            'message' => 'Product has been created Successfully.',
+            'product' => $product
         ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Product $product)
+    public function show(int $store, int $product)
     {
-        //
+        $store = Store::where('id', $store)->first();
+        if (!$store) {
+            return response()->json(['error' => 'This store is not exists']);
+        }
+
+        $product = Product::where('id', $product)->withImages()->first();
+        if (!$product) {
+            return response()->json(['error' => 'This product does not exist']);
+        }
+
+        $product = array_merge($product->toArray(), [
+            'images' => $product->images->pluck('path')->map(function ($path) {
+                return asset('storage/'.$path);
+            })->toArray()
+        ]);
+
+        return response()->json(['product' => $product]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, int $store, int $product)
     {
-        //
+        $store = Store::where('id', $store)->first();
+        if (!$store) {
+            return response()->json(['error' => 'This store is not exists']);
+        }
+
+        $product = Product::where('id', $product)->first();
+        if (!$product) {
+            return response()->json(['error' => 'This product is not exists']);
+        }
+
+        $validatedData = $request->validate([
+            'name'        => 'sometimes|string|max:128',
+            'description' => 'sometimes|string|max:255',
+            'price'       => 'sometimes|min:0',
+            'stock'       => 'sometimes|min:0',
+        ]);
+
+
+        $product->update($validatedData);
+        $product->save();
+
+        return response()->json([
+            'message' => 'Product has been updated successfully.',
+            'product' => $product
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Product $product)
+    public function destroy(int $store, int $product)
     {
-        //
+        $store = Store::where('id', $store)->first();
+        if (!$store) {
+            return response()->json(['error' => 'This store is not exists']);
+        }
+
+        $product = Product::where('id', $product)->first();
+        if (!$product) {
+            return response()->json(['error' => 'This product is not exists']);
+        }
+
+        Storage::disk('public')->deleteDirectory("gallery/products/product-$product->id");
+        $product->delete();
+
+        return response()->json(['message' => 'The product has been deleted successfully.']);
     }
 }
