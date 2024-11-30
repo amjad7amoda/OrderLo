@@ -4,6 +4,7 @@ use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 return new class extends Migration
 {
@@ -19,7 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', User::$roles);
             $table->string('location')->nullable();
-            $table->string('avatar')->nullable();
+            $table->string('avatar');
             $table->rememberToken();
             $table->timestamps();
         });
@@ -48,5 +49,9 @@ return new class extends Migration
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+
+        if(Storage::disk('public')->exists('gallery/users')){
+            Storage::disk('public')->deleteDirectory('gallery/users');
+        }
     }
 };

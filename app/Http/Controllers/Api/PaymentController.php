@@ -15,9 +15,9 @@ class PaymentController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $payments = Payment::where("user_id", $user->id)->get();
+        $payments = $user->payments;
         return response()->json($payments);
-        
+
     }
 
     /**
@@ -25,6 +25,7 @@ class PaymentController extends Controller
      */
     public function store(Request $request)
     {
+        $user = $request->user();
         // check if payment methode exists
         $existingPayment = Payment::where('user_id', $request->user()->id)
         ->where('payment_method', $request->payment_method)
@@ -34,23 +35,22 @@ class PaymentController extends Controller
         // error if payment methode exists
         if ($existingPayment) {
             return response()->json([
-                "message" => "Payment method already exists"],409); 
+                "message" => "Payment method already exists"],409);
         }
 
         //validate data
         $validatedData = $request->validate([
             'payment_method' => 'required|string',
-            'card_number' => 'required|string',
+            'card_number' => 'required|string|min:10|max:20',
         ]);
 
         //add payment method
-        $payment = Payment::create([
-            'user_id'=>$request->user()->id,
+        $user->payments()->create([
             'payment_method' =>$request->payment_method,
             'card_number' =>$request->card_number
         ]);
-        return response()->json(["message"=> "Payment maethod added successful"],201);
-        
+        return response()->json(["message"=> "Payment method added successfully"]);
+
     }
 
     /**
@@ -66,15 +66,30 @@ class PaymentController extends Controller
      */
     public function update(Request $request, int $payment)
     {
+        $payment = Payment::where('id', $payment)->first();
+        if(!$payment)
+            return response()->json(['error' => 'This payment method is not exist'],404);
+
+        $request->validate([
+            'card_number' => 'required|min:10|max:20'
+        ]);
+
+        $payment->update(['card_number' => $request->card_number]);
+
+        return response()->json(['payment' => $payment]);
 
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Payment $payment)
+    public function destroy(Request $request, int $payment)
     {
+        $payment = Payment::where('id',$payment)->first();
+        if(!$payment)
+            return response()->json(['error' => 'This payment method is not exist'],404 );
+
         $payment->delete();
-        return response()->json(["message"=> "deleted"]);
+        return response()->json(["message"=> "The payment method has been deleted."]);
     }
 }

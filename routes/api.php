@@ -21,12 +21,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::apiResource('stores', StoreController::class);
 Route::apiResource('stores.products', ProductController::class);
-//Route::apiResource('products.images', ImageController::class);
+Route::apiResource('products.images', ImageController::class);
 
 
 
 // user Routes
-Route::get('/user', function (Request $request){return $request->user();})->middleware('auth:sanctum');
+Route::get('/user', [UserController::class,'show'])->middleware('auth:sanctum');
 Route::put( '/user', [UserController::class,'update'])->middleware('auth:sanctum');
 Route::delete('/user', [UserController::class,'destroy'])->middleware('auth:sanctum');
 
@@ -34,4 +34,5 @@ Route::delete('/user', [UserController::class,'destroy'])->middleware('auth:sanc
 //Route::apiResource('user.payment', PaymentController::class);
 Route::post('/user/payment', [PaymentController::class,'store'])->middleware('auth:sanctum');
 Route::get('/user/payment', [PaymentController::class,'index'])->middleware('auth:sanctum');
+Route::put( '/user/payment/{payment}', [PaymentController::class,'update'])->middleware('auth:sanctum');
 Route::delete('/user/payment/{payment}', [PaymentController::class,'destroy'])->middleware('auth:sanctum');
