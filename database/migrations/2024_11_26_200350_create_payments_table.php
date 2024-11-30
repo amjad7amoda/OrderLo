@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->enum('payment_method',Payment::$payment_methods);
-            $table->integer('card_number');
+            $table->string('card_number');
             $table->timestamps();
         });
     }
