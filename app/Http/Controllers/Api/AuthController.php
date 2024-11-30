@@ -29,6 +29,7 @@ class AuthController extends Controller
         $validatedData['password'] = bcrypt($validatedData['password']);
 
         $user = User::create([...$validatedData, 'avatar' => 'gallery/defaultAvatar.png']);
+        $user->cart()->create();
         $token = $user->createToken('login-token');
 
         return response()->json([

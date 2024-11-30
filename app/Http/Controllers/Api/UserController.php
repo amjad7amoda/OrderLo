@@ -67,6 +67,7 @@ class UserController extends Controller
     public function destroy(Request $request)
     {
         $user = $request->user();
+
         if($user->avatar != "gallery/defaultAvatar.png")
             Storage::disk('public')->delete($user->avatar);
         $user->delete();
