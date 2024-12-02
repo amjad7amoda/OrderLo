@@ -9,32 +9,27 @@ use Illuminate\Http\Request;
 
 class ImageController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index(int $product)
     {
         $product = Product::where('id', $product)->first();
         if (!$product) {
-            return response()->json(['error' => 'This product is not exists']);
+            return response()->json(['error' => 'This product is not exists'], 404);
         }
 
         $images = $product->images->map(function ($image) {
             $image->path = asset($image->path);
-            return $image; // إنشاء الرابط الكامل
+            return $image;
         });
 
-        return response()->json(['images' => $images]);
+        return response()->json(['images' => $images], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request, int $product)
     {
         $product = Product::where('id', $product)->first();
         if (!$product) {
-            return response()->json(['error' => 'This product is not exists']);
+            return response()->json(['error' => 'This product is not exists'], 404);
         }
 
         $validatedData = $request->validate([
@@ -59,40 +54,21 @@ class ImageController extends Controller
             ]);
         }
 
-        return response()->json(['message' => 'Images has been added successfully']);
+        return response()->json(['message' => 'Images has been added successfully'], 200);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(int $product, int $image)
     {
         $product = Product::where('id', $product)->first();
         if (!$product) {
-            return response()->json(['error' => 'This product is not exists']);
+            return response()->json(['error' => 'This product is not exists'], 404);
         }
         $image = Image::where('id', $image)->first();
         if (!$image) {
-            return response()->json(['error' => 'This image is not exists']);
+            return response()->json(['error' => 'This image is not exists'], 404);
         }
 
         $image->path = asset('storage/'.$image->path);
-        return response()->json(['image' => $image]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Image $image)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Image $image)
-    {
-        //
+        return response()->json(['image' => $image], 200);
     }
 }

@@ -14,12 +14,6 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
-
-
-        if($request->user())
-            return response()->json(['error'=>'You already logged in.']);
-
-
         $validatedData = $request->validate([
             'name'         => 'required',
             "phone_number" => 'required|unique:users|min:10|max:10',
@@ -34,38 +28,35 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token
-        ]);
+        ], 200  );
     }
 
     public function login(Request $request)
     {
-
-
-        $validatedData = $request->validate([
+        $request->validate([
             'phone_number' => 'required',
-            'password' => 'required'
+            'password'     => 'required'
         ]);
-
 
         $user = User::Where('phone_number', $request->phone_number)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'error' => 'The credentials are incorrect'
-            ]);
+            ], 404);
         }
 
         if ($user->tokens()->where('name', 'api-token')->exists()) {
             return response()->json([
                 'message' => 'You are already logged in'
-            ]);
+            ], 403);
         }
 
         $token = $user->createToken('api-token');
 
         return response()->json([
             'token' => $token
-        ]);
+        ], 200);
     }
 
     public function logout(Request $request)
@@ -73,7 +64,7 @@ class AuthController extends Controller
         $request->user()->tokens()->delete();
         return response()->json([
             'message' => 'Logged out successfully.'
-        ]);
+        ], 200);
     }
 
 

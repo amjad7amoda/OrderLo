@@ -29,14 +29,14 @@ class ProductController extends Controller
                 ]
             );
         });
-        return response()->json(['products' => $products]);
+        return response()->json(['products' => $products], 200);
     }
 
     public function store(Request $request, int $store)
     {
         $store = Store::where('id', $store)->first();
         if (!$store) {
-            return response()->json(['error' => 'This store is not exists']);
+            return response()->json(['error' => 'This store is not exists'], 404);
         }
 
         $validatedData = $request->validate([
@@ -51,19 +51,19 @@ class ProductController extends Controller
         return response()->json([
             'message' => 'Product has been created Successfully.',
             'product' => $product
-        ]);
+        ], 200);
     }
 
     public function show(int $store, int $product)
     {
         $store = Store::where('id', $store)->first();
         if (!$store) {
-            return response()->json(['error' => 'This store is not exists']);
+            return response()->json(['error' => 'This store is not exists'], 404);
         }
 
         $product = Product::where('id', $product)->withImages()->first();
         if (!$product) {
-            return response()->json(['error' => 'This product does not exist']);
+            return response()->json(['error' => 'This product does not exist'], 404);
         }
 
         $product = array_merge($product->toArray(), [
@@ -72,19 +72,19 @@ class ProductController extends Controller
             })->toArray()
         ]);
 
-        return response()->json(['product' => $product]);
+        return response()->json(['product' => $product], 200);
     }
 
     public function update(Request $request, int $store, int $product)
     {
         $store = Store::where('id', $store)->first();
         if (!$store) {
-            return response()->json(['error' => 'This store is not exists']);
+            return response()->json(['error' => 'This store is not exists'], 404);
         }
 
         $product = Product::where('id', $product)->first();
         if (!$product) {
-            return response()->json(['error' => 'This product is not exists']);
+            return response()->json(['error' => 'This product is not exists'], 404);
         }
 
         $validatedData = $request->validate([
@@ -101,24 +101,24 @@ class ProductController extends Controller
         return response()->json([
             'message' => 'Product has been updated successfully.',
             'product' => $product
-        ]);
+        ], 200);
     }
 
     public function destroy(int $store, int $product)
     {
         $store = Store::where('id', $store)->first();
         if (!$store) {
-            return response()->json(['error' => 'This store is not exists']);
+            return response()->json(['error' => 'This store is not exists'], 404);
         }
 
         $product = Product::where('id', $product)->first();
         if (!$product) {
-            return response()->json(['error' => 'This product is not exists']);
+            return response()->json(['error' => 'This product is not exists'], 404);
         }
 
         Storage::disk('public')->deleteDirectory("gallery/products/product-$product->id");
         $product->delete();
 
-        return response()->json(['message' => 'The product has been deleted successfully.']);
+        return response()->json(['message' => 'The product has been deleted successfully.'], 200);
     }
 }

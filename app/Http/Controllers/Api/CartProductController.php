@@ -24,8 +24,9 @@ class CartProductController extends Controller
 
         $cart = $user->cart;
         $product = Product::where('id', $product)->first();
-        if (!$product)
-            return response()->json(['error' => 'This product is not exists.']);
+        if (!$product) {
+            return response()->json(['error' => 'This product is not exists.'], 404);
+        }
 
         $existingProduct = $cart->products()->where('product_id', $product->id)->first();
         if ($existingProduct) {
@@ -40,7 +41,7 @@ class CartProductController extends Controller
             );
         }
 
-        return response()->json(['message' => 'The product has been added successfully.']);
+        return response()->json(['message' => 'The product has been added successfully.'], 200);
     }
 
     public function update(Request $request, int $product)
@@ -50,41 +51,43 @@ class CartProductController extends Controller
         ]);
 
         $product = Product::where('id', $product)->first();
-        if (!$product)
-            return response()->json(['error' => 'This product is not exists.']);
+        if (!$product) {
+            return response()->json(['error' => 'This product is not exists.'], 404);
+        }
 
         $cart = $request->user()->cart;
         $existingProduct = $cart->products()->where('product_id', $product->id)->first();
         if ($existingProduct) {
             $cart->products()->updateExistingPivot($product->id, [
                 'quantity' => $request->quantity,
-                'price'    => $request->quantity * $product->price, // السعر بناءً على الكمية الجديدة
+                'price'    => $request->quantity * $product->price,
             ]);
-        }else{
-            return response()->json(['error' => 'This product is not exists in your cart']);
+        } else {
+            return response()->json(['error' => 'This product is not exists in your cart'], 404);
         }
 
-        return response()->json(['message'=>'The product has been updated successfully']);
-
+        return response()->json(['message' => 'The product has been updated successfully'], 200);
     }
 
     public function destroy(Request $request, int $product)
     {
         $product = Product::where('id', $product)->first();
-        if (!$product)
-            return response()->json(['error' => 'This product is not exists.']);
+        if (!$product) {
+            return response()->json(['error' => 'This product is not exists.'], 404);
+        }
 
         $cart = $request->user()->cart;
 
         $cart->products()->detach($product->id);
 
-        return response()->json(['message' => 'The product has been removed from the cart']);
+        return response()->json(['message' => 'The product has been removed from the cart'], 200);
     }
 
-    public function clear(){
+    public function clear()
+    {
         $cart = auth()->user()->cart;
         $cart->products()->detach();
-        return response()->json(['message' => 'The cart has been cleared.']);
+        return response()->json(['message' => 'The cart has been cleared.'], 200);
     }
 
 }

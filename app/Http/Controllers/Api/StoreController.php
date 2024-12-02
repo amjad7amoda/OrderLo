@@ -11,9 +11,6 @@ use Illuminate\Support\Str;
 
 class StoreController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
 
     public function index()
     {
@@ -21,13 +18,9 @@ class StoreController extends Controller
             $store->banner = asset('storage/'.$store->banner);
             return $store;
         });
-
-        return response()->json(['stores' => $stores]);
+        return response()->json(['stores' => $stores], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -48,23 +41,20 @@ class StoreController extends Controller
         return response()->json([
             'message' => 'Store has been created Successfully.',
             'store'   => $store
-        ]);
+        ], 200);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(int $store)
     {
         $store = Store::where('id', $store)->first();
         if (!$store) {
-            return response()->json(['error' => 'This store is not exists']);
+            return response()->json(['error' => 'This store is not exists'], 404);
         }
 
         $store->banner = asset('storage/'.$store->banner);
         return response()->json([
             'store' => $store->load('products')
-        ]);
+        ], 200);
     }
 
 
@@ -72,7 +62,7 @@ class StoreController extends Controller
     {
         $store = Store::where('id', $store)->first();
         if (!$store) {
-            return response()->json(['error' => 'This store is not exists']);
+            return response()->json(['error' => 'This store is not exists'], 404);
         }
 
         $request->validate([
@@ -81,7 +71,6 @@ class StoreController extends Controller
         ]);
 
 
-        //to update the banner of store
         if ($request->hasFile('banner')) {
             Storage::disk('gallery')->delete($store->banner);
             $filename = "store-{$store->id}.png";
@@ -89,32 +78,25 @@ class StoreController extends Controller
             $store->banner = $bannerPath;
         }
 
-        //to update the name of store
         if ($request->name) {
             $store->name = $request->name;
         }
 
-        //to save changes
         $store->save();
 
-        return response()->json([
-            'store' => $store
-        ]);
+        return response()->json(['store' => $store], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(int $store)
     {
         $store = Store::where('id', $store)->first();
         if (!$store) {
-            return response()->json(['error' => 'This store is not exists']);
+            return response()->json(['error' => 'This store is not exists'], 404);
         }
 
         Storage::disk('public')->delete($store->banner);
         $store->delete();
 
-        return response()->json(['message' => 'The store has been deleted successfully']);
+        return response()->json(['message' => 'The store has been deleted successfully'], 200);
     }
 }

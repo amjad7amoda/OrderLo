@@ -8,62 +8,38 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(Request $request)
     {
         $user = $request->user();
         $user->avatar = url('storage/'.$user->avatar);
-        return response()->json($user);
+        return response()->json(['user' => $user], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    //TODO.. update avatar
     public function update(Request $request)
     {
         $user = $request->user();
         $valedatedData = $request->validate([
-            "name"=> "sometimes|string|max:26",
-            "password"=> "sometimes|min:8|max:20",
-            "phone_number"=> "sometimes|unique",
-            "location"=> "sometimes|string",
-            "avatar" => "sometimes|image|mimes:png,jpg,jpeg"
+            "name"         => "sometimes|string|max:26",
+            "password"     => "sometimes|min:8|max:20",
+            "phone_number" => "sometimes|unique",
+            "location"     => "sometimes|string",
+            "avatar"       => "sometimes|image|mimes:png,jpg,jpeg"
         ]);
 
         $user->update($valedatedData);
-        if($request->hasFile('avatar')){
+        if ($request->hasFile('avatar')) {
             $avatarName = "user-{$user->id}.png";
-            if(Storage::disk('public')->exists('gallery/users/'.$avatarName))
+            if (Storage::disk('public')->exists('gallery/users/'.$avatarName)) {
                 Storage::disk('public')->delete('gallery/users/'.$avatarName);
+            }
             $avatarPath = $request->file('avatar')->storeAS("gallery/users", $avatarName, 'public');
             $user->update(['avatar' => $avatarPath]);
         }
 
-        return response()->json($user);
+        return response()->json(['user' => $user], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Request $request)
     {
         $user = $request->user();
@@ -71,6 +47,6 @@ class UserController extends Controller
         if($user->avatar != "gallery/defaultAvatar.png")
             Storage::disk('public')->delete($user->avatar);
         $user->delete();
-        return response()->json(["message"=> "deleted"]);
+        return response()->json(["message"=> "deleted"], 200);
     }
 }
