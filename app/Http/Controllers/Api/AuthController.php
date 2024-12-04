@@ -46,10 +46,9 @@ class AuthController extends Controller
             ], 404);
         }
 
+        
         if ($user->tokens()->where('name', 'api-token')->exists()) {
-            return response()->json([
-                'message' => 'You are already logged in'
-            ], 403);
+            return response()->json(['message' => 'You are already logged in'], 403);
         }
 
         $token = $user->createToken('api-token');
