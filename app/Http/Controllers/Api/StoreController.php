@@ -12,9 +12,13 @@ use Illuminate\Support\Str;
 class StoreController extends Controller
 {
 
+    
     public function index()
     {
-        $stores = Store::with('products')->get()->map(function ($store) {
+        $filters = request()->only('search');
+
+        $stores = Store::with('products')->filter($filters)
+        ->get()->map(function ($store) {
             $store->banner = asset('storage/'.$store->banner);
             return $store;
         });

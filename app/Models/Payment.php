@@ -17,7 +17,7 @@ class Payment extends Model
     public static array $payment_methods = [
         'MTN-Cash',
         'Syriatel-Cash',
-        'BBFS',
+        'BBSF',
         'Barka'
     ];
 

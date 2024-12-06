@@ -11,41 +11,42 @@ use Illuminate\Support\Facades\Storage;
 class ProductController extends Controller
 {
 
-    public function index(int $store)
+    public function index()
     {
-        // Check if the store exists
-        $store = Store::with('products.images')->find($store);
-        if (!$store) {
-            return response()->json(['error' => 'This store does not exist'], 404);
-        }
+        
+        $filters = request()->only(
+            'search',
+            'min_price',
+            'max_price'
+        );
 
-        $products = $store->products->map(function ($product) {
+        $products = Product::filter($filters)->with('images')->get();
+        
+        return response()->json(['products' => $products
+        ->map(function ($product) {
             return array_merge(
                 $product->toArray(),
                 [
                     'images' => $product->images->map(function ($image) {
-                        return asset($image->path);
+                        return asset('storage/'.$image->path);
                     })->toArray()
                 ]
             );
-        });
-        return response()->json(['products' => $products], 200);
+        })
+    ], 200);
     }
 
-    public function store(Request $request, int $store)
+    public function store(Request $request)
     {
-        $store = Store::where('id', $store)->first();
-        if (!$store) {
-            return response()->json(['error' => 'This store is not exists'], 404);
-        }
-
         $validatedData = $request->validate([
             'name'        => 'required|string|max:128',
             'description' => 'required|string|max:255',
-            'price'       => 'required|min:0',
-            'stock'       => 'required|min:0',
+            'price'       => 'required|min:1',
+            'stock'       => 'required|min:1',
+            'store_id'    => 'required|exists:stores,id'
         ]);
 
+        $store = Store::where('id', $request->store_id)->first();
         $product = $store->products()->create($validatedData);
 
         return response()->json([
@@ -54,13 +55,8 @@ class ProductController extends Controller
         ], 200);
     }
 
-    public function show(int $store, int $product)
+    public function show(int $product)
     {
-        $store = Store::where('id', $store)->first();
-        if (!$store) {
-            return response()->json(['error' => 'This store is not exists'], 404);
-        }
-
         $product = Product::where('id', $product)->withImages()->first();
         if (!$product) {
             return response()->json(['error' => 'This product does not exist'], 404);
@@ -75,13 +71,8 @@ class ProductController extends Controller
         return response()->json(['product' => $product], 200);
     }
 
-    public function update(Request $request, int $store, int $product)
+    public function update(Request $request,  int $product)
     {
-        $store = Store::where('id', $store)->first();
-        if (!$store) {
-            return response()->json(['error' => 'This store is not exists'], 404);
-        }
-
         $product = Product::where('id', $product)->first();
         if (!$product) {
             return response()->json(['error' => 'This product is not exists'], 404);
@@ -104,13 +95,8 @@ class ProductController extends Controller
         ], 200);
     }
 
-    public function destroy(int $store, int $product)
+    public function destroy( int $product)
     {
-        $store = Store::where('id', $store)->first();
-        if (!$store) {
-            return response()->json(['error' => 'This store is not exists'], 404);
-        }
-
         $product = Product::where('id', $product)->first();
         if (!$product) {
             return response()->json(['error' => 'This product is not exists'], 404);

@@ -23,7 +23,7 @@ Route::controller(AuthController::class)->group(function () {
 
 //Store & Product & Product-Images
 Route::apiResource('stores', StoreController::class);
-Route::apiResource('stores.products', ProductController::class);
+Route::apiResource('products', ProductController::class);
 Route::apiResource('products.images', ImageController::class)->only(['show', 'store', 'index']);
 
 

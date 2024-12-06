@@ -25,10 +25,11 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            'phone_number' => fake()->unique()->numerify('##########'),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'avatar' => storage_path("app/public/gallery/defaultAvatar.png"),
+            'role' => fake()->randomElement(['user','driver']),
         ];
     }
 
