@@ -46,23 +46,17 @@ class Product extends Model
         return $this->hasMany(Image::class);
     }
 
-    public function scopeWithImages($query)
+    public function scopeFilter(QueryBuilder|EloquentBuilder $query, array $filters)
     {
-        return $query->with(['images' => function ($query) {
-            $query->select('product_id','path');
-        }]);
-    }
-
-    public function scopeFilter(QueryBuilder | EloquentBuilder $query , array $filters){
-        return $query->when($filters['search'] ?? null, function($query, $search){
-            $query->where(function($query) use ($search) {
+        return $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->where(function ($query) use ($search) {
                 $query->where('name', "LIKE", "%$search%")
-                  ->orWhere('description', "LIKE", "%$search%");
+                    ->orWhere('description', "LIKE", "%$search%");
             });
-        })->when($filters['max_price'] ?? null, function($query, $max_price){
-            $query->where('price', '<=' , $max_price);  
-          })->when($filters['min_price'] ?? null, function($query, $min_price){
-            $query->where('price' ,'>=' , $min_price);
+        })->when($filters['max_price'] ?? null, function ($query, $max_price) {
+            $query->where('price', '<=', $max_price);
+        })->when($filters['min_price'] ?? null, function ($query, $min_price) {
+            $query->where('price', '>=', $min_price);
         });
     }
 }

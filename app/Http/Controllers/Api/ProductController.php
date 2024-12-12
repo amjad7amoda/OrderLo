@@ -13,27 +13,25 @@ class ProductController extends Controller
 
     public function index()
     {
-        
         $filters = request()->only(
             'search',
             'min_price',
             'max_price'
         );
 
-        $products = Product::filter($filters)->with('images')->get();
-        
-        return response()->json(['products' => $products
-        ->map(function ($product) {
+        $products = Product::filter($filters)->get();
+        $products->transform(function ($product) {
             return array_merge(
                 $product->toArray(),
                 [
                     'images' => $product->images->map(function ($image) {
                         return asset('storage/'.$image->path);
-                    })->toArray()
+                    })
                 ]
             );
-        })
-    ], 200);
+        });
+
+        return response()->json(['products' => $products], 200);
     }
 
     public function store(Request $request)
@@ -57,21 +55,21 @@ class ProductController extends Controller
 
     public function show(int $product)
     {
-        $product = Product::where('id', $product)->withImages()->first();
+        $product = Product::where('id', $product)->first();
         if (!$product) {
             return response()->json(['error' => 'This product does not exist'], 404);
         }
 
         $product = array_merge($product->toArray(), [
-            'images' => $product->images->pluck('path')->map(function ($path) {
-                return asset('storage/'.$path);
+            'images' => $product->images->map(function ($image) {
+                return asset('storage/'.$image->path);
             })->toArray()
         ]);
 
         return response()->json(['product' => $product], 200);
     }
 
-    public function update(Request $request,  int $product)
+    public function update(Request $request, int $product)
     {
         $product = Product::where('id', $product)->first();
         if (!$product) {
@@ -95,7 +93,7 @@ class ProductController extends Controller
         ], 200);
     }
 
-    public function destroy( int $product)
+    public function destroy(int $product)
     {
         $product = Product::where('id', $product)->first();
         if (!$product) {

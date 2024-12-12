@@ -15,24 +15,25 @@ class Store extends Model
     use HasFactory;
 
     protected $fillable = [
-      'name',
-      'banner'
+        'name',
+        'banner'
     ];
 
 
-    public function products() : HasMany{
+    public function products(): HasMany
+    {
         return $this->hasMany(Product::class);
     }
 
-
-    public function scopeFilter(QueryBuilder | EloquentBuilder $query, array $filters){
-        $query->when($filters['search'] ?? null , function($query, $search) {
-          $query->where(function($query) use ($search){
-            $query->where('name', 'LIKE', "%$search%")
-            ->orWhereHas('products', function($query) use ($search){
-              $query->where('name', 'LIKE', "%$search%");
+    public function scopeFilter(QueryBuilder|EloquentBuilder $query, array $filters)
+    {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('name', 'LIKE', "%$search%")
+                    ->orWhereHas('products', function ($query) use ($search) {
+                        $query->where('name', 'LIKE', "%$search%");
+                    });
             });
-          });
         });
     }
 

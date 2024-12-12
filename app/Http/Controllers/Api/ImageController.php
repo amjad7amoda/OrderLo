@@ -41,14 +41,14 @@ class ImageController extends Controller
         $imagesPath = [];
         $folderName = "gallery/products/product-$product->id";
         $imagesNumber = $product->images()->count();
-        foreach ($images as  $image) {
+        foreach ($images as $image) {
             $imagesNumber++;
-            $imageName = "image-$product->id-". $imagesNumber . '.png';
+            $imageName = "image-$product->id-".$imagesNumber.'.png';
             $imagePath = $image->storeAs($folderName, $imageName, 'public');
             $imagesPath[] = $imagePath;
         }
 
-        foreach($imagesPath as $path){
+        foreach ($imagesPath as $path) {
             $product->images()->create([
                 'path' => $path
             ]);

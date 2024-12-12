@@ -12,16 +12,29 @@ use Illuminate\Support\Str;
 class StoreController extends Controller
 {
 
-    
+
     public function index()
     {
         $filters = request()->only('search');
 
-        $stores = Store::with('products')->filter($filters)
-        ->get()->map(function ($store) {
-            $store->banner = asset('storage/'.$store->banner);
-            return $store;
-        });
+        $stores = Store::with('products.images')
+            ->filter($filters)
+            ->get()->map(function ($store) {
+                //Store Map
+                $store->banner = asset('storage/'.$store->banner);
+                $store->products->transform(function ($product) {
+                    //Product Map
+                    return array_merge(
+                        $product->toArray(),
+                        [
+                            'images' => $product->images->map(function ($image) {
+                                return asset('storage/'.$image->path);
+                            })->toArray()
+                        ]
+                    );
+                });
+                return $store;
+            });
         return response()->json(['stores' => $stores], 200);
     }
 
@@ -50,15 +63,25 @@ class StoreController extends Controller
 
     public function show(int $store)
     {
-        $store = Store::where('id', $store)->first();
+        $store = Store::where('id', $store)->with('products.images')->first();
         if (!$store) {
             return response()->json(['error' => 'This store is not exists'], 404);
         }
 
         $store->banner = asset('storage/'.$store->banner);
-        return response()->json([
-            'store' => $store->load('products')
-        ], 200);
+        $store->products->transform(function ($product) {
+            //Product Map
+            return array_merge(
+                $product->toArray(),
+                [
+                    'images' => $product->images->transform(function ($image) {
+                        return asset('storage/'.$image->path);
+                    })->toArray()
+                ]
+            );
+        });
+
+        return response()->json(['store' => $store], 200);
     }
 
 
