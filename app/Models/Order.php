@@ -13,11 +13,18 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-
+        'user_id',
+        'status',
+        'payment_method',
+        'total_price',
+        'created_at',
+        'updated_at',
     ];
 
     public static array $status = [
-        'On way'
+        'pending',
+        'delivering',
+        'arrived'
     ];
 
     public function user(): BelongsTo

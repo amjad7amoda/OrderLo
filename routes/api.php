@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CartProductController;
 use App\Http\Controllers\Api\ImageController;
+use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\StoreController;
@@ -47,4 +48,13 @@ Route::group(['controller' => CartProductController::class, 'middleware' => 'aut
     Route::get('/cart/products/', 'index');
     Route::delete('/cart/products/{product}', 'destroy');
     Route::delete('/cart/products/', 'clear');
+});
+
+// Order Routes
+Route::group(['controller' => OrderController::class, 'middleware' => 'auth:sanctum'], function () {
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::get('/orders/{id}', [OrderController::class, 'show']);
+    Route::put('/orders/{id}', [OrderController::class, 'update']);
+    Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
 });
