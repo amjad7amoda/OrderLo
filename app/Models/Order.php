@@ -24,7 +24,8 @@ class Order extends Model
     public static array $status = [
         'pending',
         'delivering',
-        'arrived'
+        'arrived',
+        'cancelled'
     ];
 
     public function user(): BelongsTo
