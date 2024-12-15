@@ -18,8 +18,8 @@ class OrderController extends Controller
         $user = $request->user();
 
         $orders = $user->orders()
-        ->whereIn('status', ['pending', 'delivering'])
-        ->with('products')->get();
+            ->whereIn('status', ['pending', 'delivering'])
+            ->with('products')->get();
 
         if ($orders->isEmpty()) {
             return response()->json(['message' => 'No orders found for the user'], 404);
@@ -60,16 +60,16 @@ class OrderController extends Controller
         });
 
         $order = Order::create([
-            'user_id' => $user->id,
-            'status' => "pending",
+            'user_id'        => $user->id,
+            'status'         => "pending",
             'payment_method' => $paymentMethod->payment_method,
-            'total_price' => $totalPrice,
+            'total_price'    => $totalPrice,
         ]);
 
         foreach ($cartProducts as $cartProduct) {
             $order->products()->attach($cartProduct->id, [
                 'quantity' => $cartProduct->pivot->quantity,
-                'price' => $cartProduct->pivot->price,
+                'price'    => $cartProduct->pivot->price,
             ]);
 
             $cartProduct->decrement('stock', $cartProduct->pivot->quantity);
@@ -80,7 +80,7 @@ class OrderController extends Controller
         return response()->json(
             [
                 'message' => 'Order Created Successfully',
-                'order' => $order
+                'order'   => $order
             ],
             201
         );
@@ -164,7 +164,7 @@ class OrderController extends Controller
 
                 $order->products()->attach($productId, [
                     'quantity' => $newQuantity,
-                    'price' => $product->price,
+                    'price'    => $product->price,
                 ]);
 
                 $product->decrement('stock', $newQuantity);
@@ -187,7 +187,6 @@ class OrderController extends Controller
             return response()->json(['message' => 'Order updated successfully', 'order' => $order], 200);
         }
     }
-
 
 
     /**
@@ -223,7 +222,6 @@ class OrderController extends Controller
     }
 
 
-
     public function history(Request $request)
     {
         $user = $request->user();
@@ -236,7 +234,7 @@ class OrderController extends Controller
             return response()->json(['message' => 'History is empty'], 404);
         }
 
-        return response()->json(['history' => $history], 200);   
+        return response()->json(['history' => $history], 200);
     }
 
     public function updateStatus(Request $request, int $order)
@@ -244,13 +242,15 @@ class OrderController extends Controller
         $user = $request->user();
         $request->validate([
             'status' => 'required|string|in:pending,delivering,arrived,cancelled',
-        ]);        
+        ]);
         $newStatus = $request->status;
         $order = $user->orders()->find($order);
 
         if (!$order) {
-            return response()->json(['error' 
-            => 'Order not found or does not belong to the user'], 404);
+            return response()->json([
+                'error'
+                => 'Order not found or does not belong to the user'
+            ], 404);
         }
         $order->status = $request->status;
         $order->save();
