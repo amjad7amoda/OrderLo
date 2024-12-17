@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CartProductController;
+use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
@@ -59,4 +60,15 @@ Route::group(['controller' => OrderController::class, 'middleware' => 'auth:sanc
     Route::put('/orders/{orderId}/products/{productId}', [OrderController::class, 'update']);
     Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
     Route::put('/orders/updateStatus/{id}', [OrderController::class, 'updateStatus']);
+});
+
+// Delivery Routes
+Route::group(['controller' => DriverController::class, 'middleware' => 'auth:sanctum'], function () {
+    Route::get('/drivers', [DriverController::class, 'getAllDrivers']);
+    Route::get('/drivers/orders/available', [DriverController::class, 'getAllOrders']);
+    Route::get('/drivers/assigned-deliveries', [DriverController::class, 'assignedDeliveries']);
+    Route::get('/drivers/orders/{orderId}', [DriverController::class, 'showOrder']);
+    Route::put('/drivers/orders/{orderId}/accept', [DriverController::class, 'acceptOrder']);
+    Route::put('/drivers/orders/{orderId}/arrived', [DriverController::class, 'markAsArrived']);
+    Route::put('/drivers/orders/{orderId}/cancel', [DriverController::class, 'cancelDelivery']);
 });
