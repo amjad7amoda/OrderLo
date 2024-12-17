@@ -74,6 +74,7 @@ Route::group(['controller' => OrderController::class, 'middleware' =>['auth:sanc
     Route::put('/orders/updateStatus/{id}', [OrderController::class, 'updateStatus']);
 });
 
+<<<<<<< HEAD
 // drivers routes
 Route::group(['middleware' => ['auth:sanctum', 'role:driver,admin'], 'controller' => DriverController::class], function () {
     Route::get('/driver', 'index');
@@ -82,3 +83,15 @@ Route::group(['middleware' => ['auth:sanctum', 'role:driver,admin'], 'controller
 
 
 });
+=======
+// Delivery Routes
+Route::group(['controller' => DriverController::class, 'middleware' => 'auth:sanctum'], function () {
+    Route::get('/drivers', [DriverController::class, 'getAllDrivers']);
+    Route::get('/drivers/orders/available', [DriverController::class, 'getAllOrders']);
+    Route::get('/drivers/assigned-deliveries', [DriverController::class, 'assignedDeliveries']);
+    Route::get('/drivers/orders/{orderId}', [DriverController::class, 'showOrder']);
+    Route::put('/drivers/orders/{orderId}/accept', [DriverController::class, 'acceptOrder']);
+    Route::put('/drivers/orders/{orderId}/arrived', [DriverController::class, 'markAsArrived']);
+    Route::put('/drivers/orders/{orderId}/cancel', [DriverController::class, 'cancelDelivery']);
+});
+>>>>>>> 6f17c6faa1d4531e10e82bbb8d4505dbbfa76211

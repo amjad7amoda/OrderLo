@@ -38,4 +38,9 @@ class Order extends Model
         return $this->belongsToMany(Product::class, 'order_product_pivot')
             ->withPivot('quantity', 'price');
     }
+
+    public function driver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'driver_id');
+    }
 }
