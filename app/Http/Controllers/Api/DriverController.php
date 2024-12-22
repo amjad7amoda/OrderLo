@@ -2,13 +2,20 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 
 class DriverController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum');
+        $this->middleware('role:administrator,driver');
+    }
+
     public function getAllDrivers()
     {
         $drivers = User::where('role', 'driver')->get();
@@ -76,7 +83,7 @@ class DriverController extends Controller
 
     public function showOrder(Request $request, $orderId)
     {
-        $user = $request->user(); 
+        $user = $request->user();
 
         if ($user->role !== 'driver') {
             return response()->json(['error' => 'Only drivers can access this order'], 403);
@@ -85,7 +92,7 @@ class DriverController extends Controller
         $order = $user->deliveryOrders()
             ->where('id', $orderId)
             // ->where('status', 'delivering')
-            ->with('products') 
+            ->with('products')
             ->first();
 
         if (!$order) {

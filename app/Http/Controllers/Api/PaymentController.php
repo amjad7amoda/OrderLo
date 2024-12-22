@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,13 +10,17 @@ use Illuminate\Support\Facades\Auth;
 class PaymentController extends Controller
 {
 
-    public function index(Request $request)
+    public function __construct()
     {
-        $user = $request->user();
-        $payments = $user->payments;
-        return response()->json(['payments', $payments], 200);
+        $this->middleware('auth:sanctum');
+        $this->middleware('role:administrator,user');
     }
 
+    public function index(Request $request)
+    {
+        $payments = $request->user()->payments;
+        return response()->json(['payments', $payments], 200);
+    }
 
     public function store(Request $request)
     {

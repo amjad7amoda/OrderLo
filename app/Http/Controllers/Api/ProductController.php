@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use App\Models\Product;
 use App\Models\Store;
 use Illuminate\Http\Request;
@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+
+    public function __construct(){
+        $this->middleware('auth:sanctum');
+        $this->middleware('role:administrator')->except(['index', 'show']);
+    }
 
     public function index()
     {
@@ -19,18 +24,7 @@ class ProductController extends Controller
             'max_price'
         );
 
-        $products = Product::filter($filters)->get();
-        $products->transform(function ($product) {
-            return array_merge(
-                $product->toArray(),
-                [
-                    'images' => $product->images->map(function ($image) {
-                        return asset('storage/'.$image->path);
-                    })
-                ]
-            );
-        });
-
+        $products = Product::filter($filters)->productImages();
         return response()->json(['products' => $products], 200);
     }
 
@@ -55,16 +49,11 @@ class ProductController extends Controller
 
     public function show(int $product)
     {
-        $product = Product::where('id', $product)->first();
+        $product = Product::where('id', $product)->productImages()->first();
         if (!$product) {
             return response()->json(['error' => 'This product does not exist'], 404);
         }
 
-        $product = array_merge($product->toArray(), [
-            'images' => $product->images->map(function ($image) {
-                return asset('storage/'.$image->path);
-            })->toArray()
-        ]);
 
         return response()->json(['product' => $product], 200);
     }

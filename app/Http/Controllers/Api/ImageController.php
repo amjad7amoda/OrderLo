@@ -10,6 +10,12 @@ use Illuminate\Http\Request;
 class ImageController extends Controller
 {
 
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum');
+        $this->middleware('role:administrator')->except('index');
+    }
+
     public function index(int $product)
     {
         $product = Product::where('id', $product)->first();
@@ -71,4 +77,5 @@ class ImageController extends Controller
         $image->path = asset('storage/'.$image->path);
         return response()->json(['image' => $image], 200);
     }
+
 }

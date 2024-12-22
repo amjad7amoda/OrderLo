@@ -59,4 +59,15 @@ class Product extends Model
             $query->where('price', '>=', $min_price);
         });
     }
+
+    public function scopeProductImages(QueryBuilder|EloquentBuilder $query)
+    {
+        return $query->with('images')->get()->map(function ($product) {
+            return array_merge($product->toArray(), [
+                "images" => $product->images->map(function ($image) {
+                    return asset('storage/'.$image->path);
+                })
+            ]);
+        });
+    }
 }

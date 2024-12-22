@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Models\Product;
+use Illuminate\Routing\Controller;
 use App\Models\Store;
-use App\Traits\CanLoadRelationships;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -12,6 +12,10 @@ use Illuminate\Support\Str;
 class StoreController extends Controller
 {
 
+    public function __construct(){
+        $this->middleware('auth:sanctum');
+        $this->middleware('role:administrator')->except(['index' , 'show']);
+    }
 
     public function index()
     {
@@ -23,15 +27,7 @@ class StoreController extends Controller
                 //Store Map
                 $store->banner = asset('storage/'.$store->banner);
                 $store->products->transform(function ($product) {
-                    //Product Map
-                    return array_merge(
-                        $product->toArray(),
-                        [
-                            'images' => $product->images->map(function ($image) {
-                                return asset('storage/'.$image->path);
-                            })->toArray()
-                        ]
-                    );
+                    return Product::where('id', $product->id)->productImages()->first();
                 });
                 return $store;
             });
@@ -67,18 +63,9 @@ class StoreController extends Controller
         if (!$store) {
             return response()->json(['error' => 'This store is not exists'], 404);
         }
-
         $store->banner = asset('storage/'.$store->banner);
         $store->products->transform(function ($product) {
-            //Product Map
-            return array_merge(
-                $product->toArray(),
-                [
-                    'images' => $product->images->transform(function ($image) {
-                        return asset('storage/'.$image->path);
-                    })->toArray()
-                ]
-            );
+            return Product::where('id', $product->id)->productImages()->first();
         });
 
         return response()->json(['store' => $store], 200);
@@ -99,7 +86,7 @@ class StoreController extends Controller
 
 
         if ($request->hasFile('banner')) {
-            Storage::disk('gallery')->delete($store->banner);
+            Storage::disk('public')->delete($store->banner);
             $filename = "store-{$store->id}.png";
             $bannerPath = $request->file('banner')->storeAs('gallery/stores', $filename, 'public');
             $store->banner = $bannerPath;
