@@ -12,7 +12,7 @@ class UserController extends Controller
     public function show(Request $request)
     {
         $user = $request->user();
-        $user->avatar = url('storage/'.$user->avatar);
+        $user->avatar = asset('storage/'.$user->avatar);
         return response()->json(['user' => $user], 200);
     }
 
