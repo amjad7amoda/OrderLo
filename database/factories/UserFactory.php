@@ -28,7 +28,7 @@ class UserFactory extends Factory
             'phone_number' => fake()->unique()->numerify('##########'),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'avatar' => storage_path("app/public/gallery/defaultAvatar.png"),
+            'avatar' => 'gallery/defaultAvatar.png',
             'role' => fake()->randomElement(['user','driver']),
         ];
     }

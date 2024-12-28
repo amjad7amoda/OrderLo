@@ -12,7 +12,7 @@ class UserController extends Controller
     public function show(Request $request)
     {
         $user = $request->user();
-        $user->avatar = url('storage/'.$user->avatar);
+        $user->avatar = asset('storage/'.$user->avatar);
         return response()->json(['user' => $user], 200);
     }
 
@@ -22,7 +22,7 @@ class UserController extends Controller
         $valedatedData = $request->validate([
             "name"         => "sometimes|string|max:26",
             "password"     => "sometimes|min:8|max:20",
-            "phone_number" => "sometimes|unique",
+            "phone_number" => "sometimes|unique:users|max:10|min:10",
             "location"     => "sometimes|string",
             "avatar"       => "sometimes|image|mimes:png,jpg,jpeg"
         ]);

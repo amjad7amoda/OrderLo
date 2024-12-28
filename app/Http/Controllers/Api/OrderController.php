@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
@@ -10,9 +10,12 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum');
+        $this->middleware('role:administrator,user');
+    }
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -25,23 +28,32 @@ class OrderController extends Controller
             return response()->json(['message' => 'No orders found for the user'], 404);
         }
 
+        $orders->transform(function ($order) {
+            $order->products->each(function ($product) {
+                return $product->pivot->price = (float)$product->pivot->price;
+            });
+            $order->products->transform(function ($product) {
+                return
+                    array_merge(
+                        Product::where('id', $product->id)->productImages()->first(),
+                        ['pivot' => $product->pivot]
+                    );
+            });
+            return $order;
+        });
         return response()->json(['orders' => $orders], 200);
     }
 
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $user = $request->user();
-        $paymentMethod = $user->payments()->first();
 
-        $cart = Cart::where('user_id', $user->id)->first();
-        if (!$cart) {
-            return response()->json(['error' => 'Cart not found for user'], 404);
+        $paymentMethod = $user->payments()->first();
+        if (!$paymentMethod) {
+            return response()->json(['error' => 'Please enter a payment method']);
         }
 
+        $cart = $user->cart;
         $cartProducts = $cart->products;
         if ($cartProducts->isEmpty()) {
             return response()->json(['error' => 'Cart is empty'], 400);
@@ -60,10 +72,10 @@ class OrderController extends Controller
         });
 
         $order = Order::create([
-            'user_id'        => $user->id,
-            'status'         => "pending",
+            'user_id' => $user->id,
+            'status' => "pending",
             'payment_method' => $paymentMethod->payment_method,
-            'total_price'    => $totalPrice,
+            'total_price' => $totalPrice,
         ]);
 
         foreach ($cartProducts as $cartProduct) {
@@ -77,36 +89,32 @@ class OrderController extends Controller
 
         $cart->products()->detach();
 
-        return response()->json(
-            [
-                'message' => 'Order Created Successfully',
-                'order'   => $order
-            ],
-            201
-        );
+        return response()->json([
+            'message' => 'Order Created Successfully',
+            'order'   => $order
+        ], 201);
     }
 
-
-    /**
-     * Display the specified resource.
-     */
     public function show(Request $request, $id)
     {
         $user = $request->user();
-
-        $order = $user->orders()->with('products')->where('id', $id)->first();
-
+        $order = $user->orders()->where('id', $id)->first();
         if (!$order) {
             return response()->json(['error' => 'Order not found or unauthorized'], 404);
         }
 
+        $order->products->each(function ($product) {
+            return $product->pivot->price = (float)$product->pivot->price;
+        });
+        $order->products->transform(function ($product) {
+            return array_merge(
+                Product::where('id', $product->id)->productImages()->first(),
+                ['pivot' => $product->pivot]
+            );
+        });
         return response()->json(['order' => $order], 200);
     }
 
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $orderId, $productId)
     {
         $request->validate([
@@ -188,18 +196,11 @@ class OrderController extends Controller
         }
     }
 
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Request $request, $id)
     {
         $user = $request->user();
 
-        $order = Order::where('id', $id)
-            ->where('user_id', $user->id)
-            ->first();
-
+        $order = Order::where('id', $id)->where('user_id', $user->id)->first();
         if (!$order) {
             return response()->json(['error' => 'Order not found or unauthorized'], 404);
         }
@@ -210,17 +211,14 @@ class OrderController extends Controller
 
         foreach ($order->products as $product) {
             $quantity = $product->pivot->quantity;
-
             $product->increment('stock', $quantity);
         }
 
-        $order->products()->detach();
+        $products = $order->products()->detach();
 
         $order->update(['status' => 'cancelled']);
-
         return response()->json(['message' => 'Order cancelled successfully, and stock has been restored'], 200);
     }
-
 
     public function history(Request $request)
     {
@@ -233,7 +231,18 @@ class OrderController extends Controller
         if ($history->isEmpty()) {
             return response()->json(['message' => 'History is empty'], 404);
         }
-
+        $history->transform(function ($order) {
+            $order->products->each(function ($product) {
+                return $product->pivot->price = (float)$product->pivot->price;
+            });
+            $order->products->transform(function ($product) {
+                return array_merge(
+                    Product::where('id', $product->id)->productImages()->first(),
+                    ['pivot' => $product->pivot]
+                );
+            });
+            return $order;
+        });
         return response()->json(['history' => $history], 200);
     }
 

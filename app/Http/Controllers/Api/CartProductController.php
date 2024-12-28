@@ -2,17 +2,28 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
 class CartProductController extends Controller
 {
 
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum');
+        $this->middleware('role:administrator,user');
+    }
+
     public function index()
     {
-        $cart = auth()->user()->cart;
-        return $cart->load('products');
+        $cart = auth()->user()->cart->load('products');
+        return $cart->products->map(function ($product) {
+            return array_merge(
+                Product::where('id', $product->id)->productImages()->first(),
+                ['pivot' => $product->pivot]
+            );
+        });
     }
 
     public function store(Request $request, int $product)
@@ -38,7 +49,7 @@ class CartProductController extends Controller
         // Validate stock availability
         if ($newQuantity > $product->stock) {
             return response()->json([
-                'error' => 'Insufficient stock available. Maximum available quantity: ' . $product->stock,
+                'error' => 'Insufficient stock available. Maximum available quantity: '.$product->stock,
             ], 400);
         }
 
@@ -56,7 +67,6 @@ class CartProductController extends Controller
 
         return response()->json(['message' => 'The product has been added successfully.'], 200);
     }
-
 
     public function update(Request $request, int $product)
     {
@@ -80,7 +90,7 @@ class CartProductController extends Controller
         // Validate stock availability
         if ($request->quantity > $product->stock) {
             return response()->json([
-                'error' => 'Insufficient stock available. Maximum available quantity: ' . $product->stock,
+                'error' => 'Insufficient stock available. Maximum available quantity: '.$product->stock,
             ], 400);
         }
 
@@ -92,7 +102,6 @@ class CartProductController extends Controller
 
         return response()->json(['message' => 'The product has been updated successfully'], 200);
     }
-
 
     public function destroy(Request $request, int $product)
     {

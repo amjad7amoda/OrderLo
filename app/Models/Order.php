@@ -36,11 +36,17 @@ class Order extends Model
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'order_product_pivot')
-            ->withPivot('quantity', 'price');
+            ->withPivot('quantity', 'price')
+            ->withCasts(['price' => 'decimal:2']);
     }
 
     public function driver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'driver_id');
     }
+
+    public function getTotalPriceAttribute($totalPrice){
+        return (double) $totalPrice;
+    }
+
 }

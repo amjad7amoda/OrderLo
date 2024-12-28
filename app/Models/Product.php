@@ -15,7 +15,6 @@ class Product extends Model
 {
     /** @use HasFactory<\Database\Factories\ProductFactory> */
     use HasFactory;
-
     protected $fillable = [
         'name',
         'description',
@@ -23,7 +22,9 @@ class Product extends Model
         'stock',
         'store_id'
     ];
-
+    protected $casts = [
+        'price' => 'decimal:2'
+    ];
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
@@ -46,6 +47,21 @@ class Product extends Model
         return $this->hasMany(Image::class);
     }
 
+    public function getPriceAttribute($price)
+    {
+        return (float) sprintf('%.2f', $price);
+    }
+    public function getStockAttribute($stock)
+    {
+        return (int) $stock;
+    }
+
+    public function setPriceAttribute($value)
+    {
+        $this->attributes['price'] = round($value, 2);
+    }
+
+
     public function scopeFilter(QueryBuilder|EloquentBuilder $query, array $filters)
     {
         return $query->when($filters['search'] ?? null, function ($query, $search) {
@@ -57,6 +73,17 @@ class Product extends Model
             $query->where('price', '<=', $max_price);
         })->when($filters['min_price'] ?? null, function ($query, $min_price) {
             $query->where('price', '>=', $min_price);
+        });
+    }
+
+    public function scopeProductImages(QueryBuilder|EloquentBuilder $query)
+    {
+        return $query->with('images')->get()->map(function ($product) {
+            return array_merge($product->toArray(), [
+                "images" => $product->images->map(function ($image) {
+                    return asset('storage/'.$image->path);
+                })
+            ]);
         });
     }
 }
