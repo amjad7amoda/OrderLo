@@ -13,10 +13,14 @@ class NotificationController extends Controller
     public function getNotifications(Request $request)
     {
         $user = $request->user();
-        
+        $unread_notifications= $user->unreadNotifications;
+        $read_notifications = $user->readNotifications;
+        foreach ($unread_notifications as $notification) {
+            $notification->markAsRead();
+        }
         return response()->json([
-            'unread_notifications' => $user->unreadNotifications,
-            'read_notifications' => $user->readNotifications,     
+            'unread_notifications' => $unread_notifications,
+            'read_notifications' => $read_notifications,     
         ]);
     }
 

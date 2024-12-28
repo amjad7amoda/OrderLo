@@ -7,7 +7,7 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
-
+use App\Notifications\OrderStatusChanged;
 class OrderController extends Controller
 {
     public function __construct()
@@ -263,6 +263,7 @@ class OrderController extends Controller
         }
         $order->status = $request->status;
         $order->save();
+        $order->user->notify(new OrderStatusChanged($order));
         return response()->json(
             [
                 'message' => 'Order status updated successfully',

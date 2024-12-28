@@ -37,14 +37,9 @@ Route::put('/user', [UserController::class, 'update'])->middleware('auth:sanctum
 Route::delete('/user', [UserController::class, 'destroy'])->middleware('auth:sanctum');
 
 
-<<<<<<< HEAD
 
 //Cart Product Routes
 Route::group(['middleware' => ['auth:sanctum', 'role:user,administrator'], 'controller' => PaymentController::class], function () {
-=======
-//Payment Method
-Route::group(['controller' => PaymentController::class], function () {
->>>>>>> 643911dd959824f9f1813a4998843ce9bd0e1ddf
     Route::post('/user/payment', 'store');
     Route::get('/user/payment', 'index');
     Route::put('/user/payment/{payment}', 'update');
@@ -52,11 +47,7 @@ Route::group(['controller' => PaymentController::class], function () {
 });
 
 //Cart-Product Controller
-<<<<<<< HEAD
 Route::group(['controller' => CartProductController::class, 'middleware' =>['auth:sanctum', 'role:user,administrator']], function () {
-=======
-Route::group(['controller' => CartProductController::class], function () {
->>>>>>> 643911dd959824f9f1813a4998843ce9bd0e1ddf
     Route::post('/cart/products/{product}', 'store');
     Route::put('/cart/products/{product}', 'update');
     Route::get('/cart/products/', 'index');
@@ -65,11 +56,7 @@ Route::group(['controller' => CartProductController::class], function () {
 });
 
 // Order Routes
-<<<<<<< HEAD
 Route::group(['controller' => OrderController::class, 'middleware' =>['auth:sanctum', 'role:user,administrator']], function () {
-=======
-Route::group(['controller' => OrderController::class], function () {
->>>>>>> 643911dd959824f9f1813a4998843ce9bd0e1ddf
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/history', [OrderController::class, 'history']);
     Route::post('/orders', [OrderController::class, 'store']);
@@ -79,19 +66,9 @@ Route::group(['controller' => OrderController::class], function () {
     Route::put('/orders/updateStatus/{id}', [OrderController::class, 'updateStatus']);
 });
 
-<<<<<<< HEAD
-
-// drivers routes
-Route::group(['middleware' => ['auth:sanctum', 'role:driver,administrator'], 'controller' => DriverController::class], function () {
-    Route::get('/driver', 'index');
-    Route::get('/driver/Orders', 'show');
-    Route::get('/driver/Order/{id}', 'store');
 
 
-});
 
-=======
->>>>>>> 643911dd959824f9f1813a4998843ce9bd0e1ddf
 // Delivery Routes
 Route::group(['controller' => DriverController::class], function () {
     Route::get('/drivers', [DriverController::class, 'getAllDrivers']);
@@ -103,7 +80,6 @@ Route::group(['controller' => DriverController::class], function () {
     Route::put('/drivers/orders/{orderId}/cancel', [DriverController::class, 'cancelDelivery']);
 });
 
-<<<<<<< HEAD
 
 // notification routes
 
@@ -114,5 +90,3 @@ Route::group(['middleware' => ['auth:sanctum', 'role:user'],
 
 
 });
-=======
->>>>>>> 643911dd959824f9f1813a4998843ce9bd0e1ddf

@@ -122,7 +122,7 @@ class DriverController extends Controller
         $order->driver_id = null;
         $order->status = 'pending';
         $order->save();
-
+        $order->user->notify(new OrderStatusChanged($order));
         return response()->json(['message' => 'Delivery operation has been canceled, order is now available'], 200);
     }
 
@@ -146,7 +146,7 @@ class DriverController extends Controller
         }
 
         $order->update(['status' => 'arrived']);
-
+        $order->user->notify(new OrderStatusChanged($order));
         return response()->json([
             'message' => 'Order marked as arrived successfully.',
             'order' => $order
