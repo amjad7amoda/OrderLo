@@ -49,13 +49,17 @@ class Product extends Model
 
     public function getPriceAttribute($price)
     {
-        return (double) $price;
+        return (float) sprintf('%.2f', $price);
     }
     public function getStockAttribute($stock)
     {
         return (int) $stock;
     }
 
+    public function setPriceAttribute($value)
+    {
+        $this->attributes['price'] = round($value, 2);
+    }
 
 
     public function scopeFilter(QueryBuilder|EloquentBuilder $query, array $filters)
