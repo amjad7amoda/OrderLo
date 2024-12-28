@@ -19,6 +19,7 @@ class CartProductController extends Controller
     {
         $cart = auth()->user()->cart->load('products');
         return $cart->products->map(function ($product) {
+            $product->pivot->price = (float) $product->pivot->price;
             return array_merge(
                 Product::where('id', $product->id)->productImages()->first(),
                 ['pivot' => $product->pivot]
