@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('description');
-            $table->decimal('price');
+            $table->integer('price');
             $table->integer('stock');
             $table->foreignIdFor(Store::class)->constrained()->cascadeOnDelete();
             $table->timestamps();

@@ -29,11 +29,15 @@ class OrderController extends Controller
         }
 
         $orders->transform(function ($order) {
+            $order->products->each(function ($product) {
+                return $product->pivot->price = (float)$product->pivot->price;
+            });
             $order->products->transform(function ($product) {
-                return array_merge(
-                    Product::where('id', $product->id)->productImages()->first(),
-                    ['pivot' => $product->pivot]
-                );
+                return
+                    array_merge(
+                        Product::where('id', $product->id)->productImages()->first(),
+                        ['pivot' => $product->pivot]
+                    );
             });
             return $order;
         });
@@ -99,6 +103,9 @@ class OrderController extends Controller
             return response()->json(['error' => 'Order not found or unauthorized'], 404);
         }
 
+        $order->products->each(function ($product) {
+            return $product->pivot->price = (float)$product->pivot->price;
+        });
         $order->products->transform(function ($product) {
             return array_merge(
                 Product::where('id', $product->id)->productImages()->first(),
@@ -225,6 +232,9 @@ class OrderController extends Controller
             return response()->json(['message' => 'History is empty'], 404);
         }
         $history->transform(function ($order) {
+            $order->products->each(function ($product) {
+                return $product->pivot->price = (float)$product->pivot->price;
+            });
             $order->products->transform(function ($product) {
                 return array_merge(
                     Product::where('id', $product->id)->productImages()->first(),

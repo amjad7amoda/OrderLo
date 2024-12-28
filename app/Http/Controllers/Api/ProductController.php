@@ -54,7 +54,6 @@ class ProductController extends Controller
             return response()->json(['error' => 'This product does not exist'], 404);
         }
 
-
         return response()->json(['product' => $product], 200);
     }
 

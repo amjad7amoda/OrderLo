@@ -15,7 +15,6 @@ class Product extends Model
 {
     /** @use HasFactory<\Database\Factories\ProductFactory> */
     use HasFactory;
-
     protected $fillable = [
         'name',
         'description',
@@ -23,7 +22,9 @@ class Product extends Model
         'stock',
         'store_id'
     ];
-
+    protected $casts = [
+        'price' => 'decimal:2'
+    ];
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
@@ -45,6 +46,17 @@ class Product extends Model
     {
         return $this->hasMany(Image::class);
     }
+
+    public function getPriceAttribute($price)
+    {
+        return (double) $price;
+    }
+    public function getStockAttribute($stock)
+    {
+        return (int) $stock;
+    }
+
+
 
     public function scopeFilter(QueryBuilder|EloquentBuilder $query, array $filters)
     {
