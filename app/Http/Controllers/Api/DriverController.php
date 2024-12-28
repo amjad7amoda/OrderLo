@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
-
+use App\Notifications\OrderStatusChanged;
 class DriverController extends Controller
 {
     public function getAllDrivers()
@@ -44,7 +44,7 @@ class DriverController extends Controller
         $order->driver_id = $user->id;
         $order->status = 'delivering';
         $order->save();
-
+        $order->user->notify(new OrderStatusChanged($order));
         // DON'T USE THIS WAY, IT WON'T WORK, USE save() INSTEAD
         // $order->update([
         //     'driver_id' => $user->id,

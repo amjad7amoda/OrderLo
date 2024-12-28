@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CartProductController;
 use App\Http\Controllers\Api\DriverController;
 use App\Http\Controllers\Api\ImageController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
@@ -47,7 +48,7 @@ Route::delete('/user', [UserController::class, 'destroy'])->middleware('auth:san
 
 
 //Cart Product Routes
-Route::group(['middleware' => ['auth:sanctum', 'role:user,admin'], 'controller' => PaymentController::class], function () {
+Route::group(['middleware' => ['auth:sanctum', 'role:user,administrator'], 'controller' => PaymentController::class], function () {
     Route::post('/user/payment', 'store');
     Route::get('/user/payment', 'index');
     Route::put('/user/payment/{payment}', 'update');
@@ -55,7 +56,7 @@ Route::group(['middleware' => ['auth:sanctum', 'role:user,admin'], 'controller' 
 });
 
 //Cart-Product Controller
-Route::group(['controller' => CartProductController::class, 'middleware' =>['auth:sanctum', 'role:user,admin']], function () {
+Route::group(['controller' => CartProductController::class, 'middleware' =>['auth:sanctum', 'role:user,administrator']], function () {
     Route::post('/cart/products/{product}', 'store');
     Route::put('/cart/products/{product}', 'update');
     Route::get('/cart/products/', 'index');
@@ -64,7 +65,7 @@ Route::group(['controller' => CartProductController::class, 'middleware' =>['aut
 });
 
 // Order Routes
-Route::group(['controller' => OrderController::class, 'middleware' =>['auth:sanctum', 'role:user,admin']], function () {
+Route::group(['controller' => OrderController::class, 'middleware' =>['auth:sanctum', 'role:user,administrator']], function () {
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/history', [OrderController::class, 'history']);
     Route::post('/orders', [OrderController::class, 'store']);
@@ -74,16 +75,16 @@ Route::group(['controller' => OrderController::class, 'middleware' =>['auth:sanc
     Route::put('/orders/updateStatus/{id}', [OrderController::class, 'updateStatus']);
 });
 
-<<<<<<< HEAD
+
 // drivers routes
-Route::group(['middleware' => ['auth:sanctum', 'role:driver,admin'], 'controller' => DriverController::class], function () {
+Route::group(['middleware' => ['auth:sanctum', 'role:driver,administrator'], 'controller' => DriverController::class], function () {
     Route::get('/driver', 'index');
     Route::get('/driver/Orders', 'show');
     Route::get('/driver/Order/{id}', 'store');
 
 
 });
-=======
+
 // Delivery Routes
 Route::group(['controller' => DriverController::class, 'middleware' => 'auth:sanctum'], function () {
     Route::get('/drivers', [DriverController::class, 'getAllDrivers']);
@@ -94,4 +95,14 @@ Route::group(['controller' => DriverController::class, 'middleware' => 'auth:san
     Route::put('/drivers/orders/{orderId}/arrived', [DriverController::class, 'markAsArrived']);
     Route::put('/drivers/orders/{orderId}/cancel', [DriverController::class, 'cancelDelivery']);
 });
->>>>>>> 6f17c6faa1d4531e10e82bbb8d4505dbbfa76211
+
+
+// notification routes
+
+Route::group(['middleware' => ['auth:sanctum', 'role:user'],
+'controller' => NotificationController::class], function () {
+    
+    Route::get('/notifications', 'getNotifications');
+
+
+});
