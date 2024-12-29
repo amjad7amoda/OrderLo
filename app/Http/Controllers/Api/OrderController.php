@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Payment;
 use Illuminate\Routing\Controller;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Notifications\OrderStatusChanged;
+use Illuminate\Validation\Rule;
+
 class OrderController extends Controller
 {
     public function __construct()
@@ -48,10 +51,17 @@ class OrderController extends Controller
     {
         $user = $request->user();
 
-        $paymentMethod = $user->payments()->first();
-        if (!$paymentMethod) {
-            return response()->json(['error' => 'Please enter a payment method']);
+        //Payments Validation
+        $paymentIds = $user->payments()->pluck('id')->toArray();
+        if (!$paymentIds) {
+            return response()->json(['error' => 'Please add a payment method']);
         }
+        $request->validate([
+            'payment_method' => ['required']
+        ]);
+        if (! in_array($request->payment_method, $paymentIds))
+            return response()->json(['message' => "You don't have this payment method"], 403);
+        $paymentMethod = Payment::where('id', $request->payment_method)->first();
 
         $cart = $user->cart;
         $cartProducts = $cart->products;
@@ -92,7 +102,7 @@ class OrderController extends Controller
         return response()->json([
             'message' => 'Order Created Successfully',
             'order'   => $order
-        ], 201);
+        ], 200);
     }
 
     public function show(Request $request, $id)

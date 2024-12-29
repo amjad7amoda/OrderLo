@@ -6,6 +6,7 @@ use Illuminate\Routing\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class PaymentController extends Controller
 {
@@ -25,7 +26,7 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'payment_method' => 'required|string',
+            'payment_method' => ['required', Rule::in(Payment::$payment_methods)],
             'card_number'    => 'required|string|min:10|max:20',
         ]);
 
