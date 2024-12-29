@@ -77,8 +77,12 @@ class DriverController extends Controller
         if ($assignedOrders->isEmpty()) {
             return response()->json(['message' => 'No active deliveries assigned to you'], 200);
         }
-
-        return response()->json(['assigned_orders' => $assignedOrders], 200);
+        $assignedOrders->each(function($order){
+            $order->products->each(function ($product) {
+                return $product->pivot->price = (float)$product->pivot->price;
+            });
+        });
+        return response()->json(['assigned_orders' => $assignedOrders[0]], 200);
     }
 
     public function showOrder(Request $request, $orderId)
@@ -98,7 +102,9 @@ class DriverController extends Controller
         if (!$order) {
             return response()->json(['error' => 'Order not found or unauthorized'], 404);
         }
-
+        $order->products->each(function ($product) {
+            return $product->pivot->price = (float)$product->pivot->price;
+        });
         return response()->json(['order' => $order], 200);
     }
     public function cancelDelivery(Request $request, $orderId)
