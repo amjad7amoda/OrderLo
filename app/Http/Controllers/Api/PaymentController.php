@@ -20,7 +20,7 @@ class PaymentController extends Controller
     public function index(Request $request)
     {
         $payments = $request->user()->payments;
-        return response()->json(['payments', $payments], 200);
+        return response()->json(['payments' => $payments], 200);
     }
 
     public function store(Request $request)
