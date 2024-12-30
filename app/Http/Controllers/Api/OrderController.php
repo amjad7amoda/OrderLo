@@ -54,7 +54,7 @@ class OrderController extends Controller
         //Payments Validation
         $paymentIds = $user->payments()->pluck('id')->toArray();
         if (!$paymentIds) {
-            return response()->json(['error' => 'Please add a payment method']);
+            return response()->json(['error' => 'Please add a payment method'], 403);
         }
         $request->validate([
             'payment_method' => ['required']

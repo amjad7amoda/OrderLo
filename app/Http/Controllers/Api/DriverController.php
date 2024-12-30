@@ -39,24 +39,19 @@ class DriverController extends Controller
             return response()->json(['error' => 'Only drivers can accept orders'], 403);
         }
 
-        $order = Order::where('id', $orderId)
-            ->where('status', 'pending')
-            ->whereNull('driver_id')
-            ->first();
-
-        if (!$order) {
-            return response()->json(['error' => 'Order not found or already taken'], 404);
-        }
+        $order = Order::where('id', $orderId)->first();
+        if(!$order)
+            return response()->json(['error' => 'This order is not exists.'], 404);
+        if($order->driver_id == $user->id)
+            return response()->json(['error' => 'You already take this order'], 403);
+        if ($order->status == 'delivering') 
+            return response()->json(['error' => 'The order has been already taken'], 404);
+        
 
         $order->driver_id = $user->id;
         $order->status = 'delivering';
         $order->save();
         $order->user->notify(new OrderStatusChanged($order));
-        // DON'T USE THIS WAY, IT WON'T WORK, USE save() INSTEAD
-        // $order->update([
-        //     'driver_id' => $user->id,
-        //     'status'    => 'delivering'
-        // ]);
 
         return response()->json(['message' => 'Order accepted successfully', 'order' => $order], 200);
     }
@@ -77,12 +72,13 @@ class DriverController extends Controller
         if ($assignedOrders->isEmpty()) {
             return response()->json(['message' => 'No active deliveries assigned to you'], 200);
         }
+        
         $assignedOrders->each(function($order){
             $order->products->each(function ($product) {
                 return $product->pivot->price = (float)$product->pivot->price;
             });
         });
-        return response()->json(['assigned_orders' => $assignedOrders[0]], 200);
+        return response()->json(['assigned_orders' => $assignedOrders], 200);
     }
 
     public function showOrder(Request $request, $orderId)
@@ -100,7 +96,7 @@ class DriverController extends Controller
             ->first();
 
         if (!$order) {
-            return response()->json(['error' => 'Order not found or unauthorized'], 404);
+            return response()->json(['error' => 'The order is not on your list'], 404);
         }
         $order->products->each(function ($product) {
             return $product->pivot->price = (float)$product->pivot->price;
