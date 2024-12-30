@@ -16,12 +16,12 @@ class UserSeeder extends Seeder
         ->create()
         ->each(function($user){
             $paymentMethods = [
-                ['payment_method' => 'MTN-Cash', 'card_number' => fake()->numerify(str_repeat('#', 10))],
-                ['payment_method' => 'Syriatel-Cash', 'card_number' => fake()->numerify(str_repeat('#', 10))],
+                ['payment_method' => 'MTN-CASH', 'card_number' => fake()->numerify(str_repeat('#', 10))],
+                ['payment_method' => 'SYRIATEL-CASH', 'card_number' => fake()->numerify(str_repeat('#', 10))],
                 ['payment_method' => 'BBSF', 'card_number' => fake()->numerify(str_repeat('#', 16))],
             ];
             foreach ($paymentMethods as $paymentData) {
-                $user->payments()->create($paymentData); 
+                $user->payments()->create($paymentData);
             }
             $user->cart()->create();
         });
