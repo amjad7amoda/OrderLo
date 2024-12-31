@@ -16,6 +16,7 @@ class OrderController extends Controller
     public function __construct()
     {
         $this->middleware('auth:sanctum');
+        $this->middleware('role:administrator')->only(['updateStatus']);
         $this->middleware('role:administrator,user');
     }
 
@@ -262,7 +263,7 @@ class OrderController extends Controller
         $request->validate([
             'status' => 'required|string|in:pending,delivering,arrived,cancelled',
         ]);
-        $newStatus = $request->status;
+
         $order = $user->orders()->find($order);
 
         if (!$order) {

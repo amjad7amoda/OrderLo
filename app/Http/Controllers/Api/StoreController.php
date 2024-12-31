@@ -14,7 +14,8 @@ class StoreController extends Controller
 
     public function __construct(){
         $this->middleware('auth:sanctum');
-        $this->middleware('role:administrator')->except(['index' , 'show']);
+        $this->middleware('role:administrator');
+        $this->middleware('role:administrator,user')->only(['index','show']);
     }
 
     public function index()
@@ -86,10 +87,20 @@ class StoreController extends Controller
 
 
         if ($request->hasFile('banner')) {
-            Storage::disk('public')->delete($store->banner);
-            $filename = "store-{$store->id}.png";
-            $bannerPath = $request->file('banner')->storeAs('gallery/stores', $filename, 'public');
-            $store->banner = $bannerPath;
+            try{
+                $deletedBanner = Storage::disk('public')->delete($store->banner);
+                if(!$deletedBanner)
+                throw new \Exception('Faild to delete the banner');
+
+                $filename = "store-{$store->id}.png";
+                $bannerPath = $request->file('banner')->storeAs('gallery/stores', $filename, 'public');
+                $store->banner = $bannerPath;
+            }catch(\Exception $e){
+                return response()->json([
+                    "message" => "An error occurred while updateting the store",
+                    "error" => $e->getMessage()
+                ], 500);
+            }
         }
 
         if ($request->name) {
@@ -108,9 +119,20 @@ class StoreController extends Controller
             return response()->json(['error' => 'This store is not exists'], 404);
         }
 
-        Storage::disk('public')->delete($store->banner);
-        $store->delete();
-
-        return response()->json(['message' => 'The store has been deleted successfully'], 200);
+        try{
+            if($store->banner != "gallery/defaultBanner.png"){
+                $deletedBanner = Storage::disk('public')->delete($store->banner);
+                if(!$deletedBanner)
+                throw new \Exception('Faild to delete the banner');
+            }
+            $store->delete();
+            return response()->json(['message' => 'The store has been deleted successfully'], 200);
+        }catch(\Exception $e){
+            return response()->json([
+                "message" => "An error occurred while deleting the user",
+                "error" => $e->getMessage()
+            ], 500);
+        
     }
+}
 }

@@ -13,7 +13,7 @@ class ImageController extends Controller
     public function __construct()
     {
         $this->middleware('auth:sanctum');
-        $this->middleware('role:administrator')->except('index');
+        $this->middleware('role:administrator')->except(['index', 'show']);
     }
 
     public function index(int $product)

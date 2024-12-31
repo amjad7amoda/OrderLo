@@ -15,7 +15,8 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validatedData = $request->validate([
-            'name'         => 'required',
+            'first_name'   => 'required|string|max:15',
+            'last_name'    => "required|string|max:15",
             "phone_number" => 'required|unique:users|min:10|max:10',
             'password'     => 'required',
             'role'         => ['required', Rule::in(User::$roles)],
@@ -62,6 +63,4 @@ class AuthController extends Controller
             'message' => 'Logged out successfully.'
         ], 200);
     }
-
-
 }
