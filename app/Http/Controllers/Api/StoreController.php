@@ -14,8 +14,8 @@ class StoreController extends Controller
 
     public function __construct(){
         $this->middleware('auth:sanctum');
-        $this->middleware('role:administrator');
-        $this->middleware('role:administrator,user')->only(['index','show']);
+        $this->middleware('role:administrator')->except(['index','show']);
+        $this->middleware('role:administrator,user');
     }
 
     public function index()
