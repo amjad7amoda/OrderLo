@@ -88,9 +88,12 @@ class StoreController extends Controller
 
         if ($request->hasFile('banner')) {
             try{
+                if($store->banner != "gallery/defaultBanner.png"){
                 $deletedBanner = Storage::disk('public')->delete($store->banner);
                 if(!$deletedBanner)
                 throw new \Exception('Faild to delete the banner');
+                }
+                
 
                 $filename = "store-{$store->id}.png";
                 $bannerPath = $request->file('banner')->storeAs('gallery/stores', $filename, 'public');
@@ -108,7 +111,7 @@ class StoreController extends Controller
         }
 
         $store->save();
-
+        $store->banner = url('storage/' . $store->banner);
         return response()->json(['store' => $store], 200);
     }
 
